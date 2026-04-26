@@ -1,0 +1,16 @@
+[build]
+# Use the project's Dockerfile (multi-stage, produces a slim image).
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+# Starts the Next.js standalone server.
+startCommand = "node server.js"
+
+# Restart the service automatically if it crashes.
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 5
+
+# Health check — same endpoint used in the Dockerfile HEALTHCHECK.
+healthcheckPath = "/api/health"
+healthcheckTimeout = 15

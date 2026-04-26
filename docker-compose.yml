@@ -1,0 +1,30 @@
+# Run JobSwipe locally or on any VPS with a single command:
+#   docker compose up -d --build
+#
+# SQLite data persists in the named volume `jobswipe_data`.
+# Put secrets in a .env file next to this compose file (AUTH_SECRET=...).
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: jobswipe:latest
+    container_name: jobswipe
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      AUTH_SECRET: ${AUTH_SECRET:?AUTH_SECRET is required — put it in .env}
+    volumes:
+      - jobswipe_data:/app/data
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3000/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))\""]
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+
+volumes:
+  jobswipe_data:
