@@ -44,35 +44,32 @@ ENV NODE_ENV=production \
     PORT=3000 \
     HOSTNAME=0.0.0.0
 
-# Create a non-root user for runtime.
-RUN groupadd -g 1001 nodejs \
-    && useradd -u 1001 -g nodejs -m -s /bin/bash nextjs
-
 # Copy only what the standalone server needs.
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
 
 # Native module for SQLite — copy the prebuilt binary from the builder.
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/better-sqlite3 ./node_modules/better-sqlite3
+COPY --from=builder /app/node_modules/better-sqlite3 ./node_modules/better-sqlite3
 
 # Seed script bundle (runs on first boot if no DB exists).
 RUN mkdir -p /app/scripts
-COPY --from=builder --chown=nextjs:nodejs /app/scripts/seed.cjs ./scripts/seed.cjs
+COPY --from=builder /app/scripts/seed.cjs ./scripts/seed.cjs
 
 # Startup wrapper: seeds DB on first run, then starts the server.
-COPY --chown=nextjs:nodejs scripts/start.sh /app/scripts/start.sh
+COPY scripts/start.sh /app/scripts/start.sh
 RUN chmod +x /app/scripts/start.sh
 
 # SQLite file lives under /app/data.
 # Railway: add a Volume and mount it to /app/data in the Railway dashboard —
 # do NOT use the VOLUME instruction here (Railway bans it).
-RUN mkdir -p /app/data && chown -R nextjs:nodejs /app/data
+# Run as root so the process can write to the Railway-mounted volume
+# (Railway volumes are owned by root; container isolation provides the security boundary).
+RUN mkdir -p /app/data
 
-USER nextjs
 EXPOSE 3000
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
-  CMD node -e "fetch('http://127.0.0.1:3000/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+  CMD node -e "fetch('http://127.0.0.1:${PORT:-8080}/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
 
 CMD ["/bin/sh", "/app/scripts/start.sh"]

@@ -4,8 +4,8 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-# Starts the Next.js standalone server.
-startCommand = "node server.js"
+# Run startup wrapper: seeds DB on first boot, then starts Next.js.
+startCommand = "/bin/sh /app/scripts/start.sh"
 
 # Restart the service automatically if it crashes.
 restartPolicyType = "ON_FAILURE"
@@ -13,4 +13,4 @@ restartPolicyMaxRetries = 5
 
 # Health check — same endpoint used in the Dockerfile HEALTHCHECK.
 healthcheckPath = "/api/health"
-healthcheckTimeout = 15
+healthcheckTimeout = 120
