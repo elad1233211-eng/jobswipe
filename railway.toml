@@ -14,3 +14,4 @@ restartPolicyMaxRetries = 5
 # Health check — same endpoint used in the Dockerfile HEALTHCHECK.
 healthcheckPath = "/api/health"
 healthcheckTimeout = 120
+# NEXT_PUBLIC_VAPID_PUBLIC_KEY must be set in Railway Variables before build.
