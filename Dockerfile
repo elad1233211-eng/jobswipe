@@ -64,9 +64,10 @@ COPY --from=builder --chown=nextjs:nodejs /app/scripts/seed.cjs ./scripts/seed.c
 COPY --chown=nextjs:nodejs scripts/start.sh /app/scripts/start.sh
 RUN chmod +x /app/scripts/start.sh
 
-# SQLite file lives under /app/data (mount a volume here in production).
+# SQLite file lives under /app/data.
+# Railway: add a Volume and mount it to /app/data in the Railway dashboard —
+# do NOT use the VOLUME instruction here (Railway bans it).
 RUN mkdir -p /app/data && chown -R nextjs:nodejs /app/data
-VOLUME ["/app/data"]
 
 USER nextjs
 EXPOSE 3000
