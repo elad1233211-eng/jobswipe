@@ -30,6 +30,7 @@ function createDb() {
 /** Safe column migrations — run after initSchema on every startup. */
 function migrateSchema(db: Database.Database) {
   const userCols = db.pragma("table_info(users)") as Array<{ name: string }>;
+  const candidateCols = db.pragma("table_info(candidates)") as Array<{ name: string }>;
 
   // Add email_verified_at to users (nullable; NULL = unverified).
   if (!userCols.some((c) => c.name === "email_verified_at")) {
@@ -39,6 +40,16 @@ function migrateSchema(db: Database.Database) {
   // Add is_disabled flag (0 = active, 1 = disabled by admin).
   if (!userCols.some((c) => c.name === "is_disabled")) {
     db.exec("ALTER TABLE users ADD COLUMN is_disabled INTEGER NOT NULL DEFAULT 0");
+  }
+
+  // Profile picture — base64 JPEG stored directly in DB (small avatar).
+  if (!candidateCols.some((c) => c.name === "avatar_b64")) {
+    db.exec("ALTER TABLE candidates ADD COLUMN avatar_b64 TEXT");
+  }
+
+  // Per-domain experience — JSON object {"תחום": years}.
+  if (!candidateCols.some((c) => c.name === "experience_json")) {
+    db.exec("ALTER TABLE candidates ADD COLUMN experience_json TEXT NOT NULL DEFAULT '{}'");
   }
 }
 
@@ -221,7 +232,9 @@ export type CandidateRow = {
   min_hourly_wage: number | null;
   available_immediately: number;
   avatar_emoji: string;
+  avatar_b64: string | null;
   skills_json: string;
+  experience_json: string; // JSON object {"תחום": years | null}
   updated_at: number;
 };
 

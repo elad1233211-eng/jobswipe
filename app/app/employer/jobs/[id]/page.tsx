@@ -48,7 +48,9 @@ export default async function JobDetail(
     min_hourly_wage: c.min_hourly_wage,
     available_immediately: !!c.available_immediately,
     avatar_emoji: c.avatar_emoji,
+    avatar_b64: c.avatar_b64 ?? null,
     skills: JSON.parse(c.skills_json || "[]") as string[],
+    experience_json: c.experience_json ?? "{}",
   }));
 
   return (

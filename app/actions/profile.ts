@@ -38,6 +38,10 @@ const candidateSchema = z.object({
   available_immediately: z.string().optional(),
   avatar_emoji: z.string().optional(),
   skills: z.string().optional(),
+  // New: profile photo as data-URI base64 JPEG (empty = keep existing)
+  avatar_b64: z.string().optional(),
+  // New: per-domain experience JSON {"domain": years | null}
+  experience_json: z.string().optional(),
 });
 
 export async function saveCandidateProfileAction(
@@ -72,6 +76,9 @@ export async function saveCandidateProfileAction(
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean),
+    // Undefined = don't overwrite existing; empty string = clear avatar
+    avatar_b64: d.avatar_b64 !== undefined && d.avatar_b64 !== "" ? d.avatar_b64 : undefined,
+    experience_json: d.experience_json || "{}",
   });
 
   redirect("/app/feed");

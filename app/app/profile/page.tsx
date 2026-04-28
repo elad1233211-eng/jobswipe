@@ -20,10 +20,18 @@ export default async function ProfilePage() {
     const p = getCandidateProfile(user.id);
     if (!p) redirect("/onboarding/candidate");
     const skills = JSON.parse(p.skills_json || "[]") as string[];
+    const expMap: Record<string, number | null> = JSON.parse(p.experience_json || "{}");
     return (
       <div className="p-4 space-y-4">
         <div className="bg-white rounded-2xl border border-slate-200 p-5 text-center">
-          <div className="text-6xl mb-2">{p.avatar_emoji}</div>
+          <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-slate-200 mx-auto mb-2 flex items-center justify-center bg-slate-50">
+            {p.avatar_b64 ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={p.avatar_b64} alt={p.full_name} className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-5xl">{p.avatar_emoji}</span>
+            )}
+          </div>
           <h1 className="text-xl font-bold">{p.full_name}</h1>
           <p className="text-slate-500">
             {p.age ? `גיל ${p.age} · ` : ""}
@@ -46,16 +54,19 @@ export default async function ProfilePage() {
         )}
         {skills.length > 0 && (
           <div className="bg-white rounded-2xl border border-slate-200 p-4">
-            <div className="text-xs text-slate-500 mb-2">כישורים</div>
+            <div className="text-xs text-slate-500 mb-2">כישורים וניסיון</div>
             <div className="flex flex-wrap gap-2">
-              {skills.map((s) => (
-                <span
-                  key={s}
-                  className="bg-pink-50 text-pink-700 text-sm px-3 py-1 rounded-full"
-                >
-                  {s}
-                </span>
-              ))}
+              {skills.map((s) => {
+                const yrs = expMap[s];
+                return (
+                  <span
+                    key={s}
+                    className="bg-pink-50 text-pink-700 text-sm px-3 py-1 rounded-full"
+                  >
+                    {s}{yrs != null ? ` · ${yrs} שנים` : ""}
+                  </span>
+                );
+              })}
             </div>
           </div>
         )}

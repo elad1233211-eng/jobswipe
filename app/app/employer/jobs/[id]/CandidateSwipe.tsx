@@ -16,7 +16,9 @@ export type Candidate = {
   min_hourly_wage: number | null;
   available_immediately: boolean;
   avatar_emoji: string;
+  avatar_b64: string | null;
   skills: string[];
+  experience_json: string; // JSON {"domain": years | null}
 };
 
 export default function CandidateSwipe({
@@ -187,7 +189,14 @@ function SwipeCard({
     >
       <div className="relative w-full h-full bg-white rounded-3xl card-shadow border border-slate-100 overflow-hidden flex flex-col" style={{ touchAction: isTop ? "pan-y" : "auto" }}>
         <div className="bg-brand-gradient p-6 text-white flex items-center gap-4">
-          <div className="text-6xl">{candidate.avatar_emoji}</div>
+          <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-white/30 shrink-0 flex items-center justify-center bg-white/10">
+            {candidate.avatar_b64 ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={candidate.avatar_b64} alt={candidate.full_name} className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-5xl">{candidate.avatar_emoji}</span>
+            )}
+          </div>
           <div>
             <h2 className="text-2xl font-bold">{candidate.full_name}</h2>
             <div className="text-sm opacity-90">
@@ -227,16 +236,20 @@ function SwipeCard({
 
           {candidate.skills.length > 0 && (
             <div>
-              <div className="text-xs text-slate-400 uppercase mb-1">כישורים</div>
+              <div className="text-xs text-slate-400 uppercase mb-1">כישורים וניסיון</div>
               <div className="flex flex-wrap gap-2">
-                {candidate.skills.map((s, i) => (
-                  <span
-                    key={i}
-                    className="bg-pink-50 text-pink-700 text-sm px-3 py-1 rounded-full"
-                  >
-                    {s}
-                  </span>
-                ))}
+                {candidate.skills.map((s, i) => {
+                  let yrs: number | null = null;
+                  try { yrs = (JSON.parse(candidate.experience_json || "{}") as Record<string, number | null>)[s] ?? null; } catch { /* ignore */ }
+                  return (
+                    <span
+                      key={i}
+                      className="bg-pink-50 text-pink-700 text-sm px-3 py-1 rounded-full"
+                    >
+                      {s}{yrs != null ? ` · ${yrs} שנים` : ""}
+                    </span>
+                  );
+                })}
               </div>
             </div>
           )}

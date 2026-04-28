@@ -30,7 +30,10 @@ export type CandidateProfileInput = {
   min_hourly_wage?: number | null;
   available_immediately?: boolean;
   avatar_emoji?: string;
+  avatar_b64?: string | null;
   skills?: string[];
+  /** JSON-serialised map of {"תחום": years | null} */
+  experience_json?: string;
 };
 
 export function upsertCandidateProfile(
@@ -41,11 +44,16 @@ export function upsertCandidateProfile(
   const now = Date.now();
   const existing = getCandidateProfile(userId);
   const skills = JSON.stringify(input.skills ?? []);
+  const expJson = input.experience_json ?? "{}";
   if (existing) {
+    // Only overwrite avatar_b64 if caller explicitly supplied a non-undefined value
+    const avatarB64 =
+      input.avatar_b64 !== undefined ? input.avatar_b64 : existing.avatar_b64;
     db.prepare(
       `UPDATE candidates SET
         full_name=?, age=?, city=?, bio=?, experience_years=?,
-        min_hourly_wage=?, available_immediately=?, avatar_emoji=?, skills_json=?, updated_at=?
+        min_hourly_wage=?, available_immediately=?, avatar_emoji=?, avatar_b64=?,
+        skills_json=?, experience_json=?, updated_at=?
        WHERE user_id=?`
     ).run(
       input.full_name,
@@ -55,8 +63,10 @@ export function upsertCandidateProfile(
       input.experience_years ?? null,
       input.min_hourly_wage ?? null,
       input.available_immediately ? 1 : 0,
-      input.avatar_emoji ?? "👤",
+      input.avatar_emoji ?? existing.avatar_emoji ?? "👤",
+      avatarB64,
       skills,
+      expJson,
       now,
       userId
     );
@@ -64,8 +74,9 @@ export function upsertCandidateProfile(
     db.prepare(
       `INSERT INTO candidates
         (user_id, full_name, age, city, bio, experience_years,
-         min_hourly_wage, available_immediately, avatar_emoji, skills_json, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+         min_hourly_wage, available_immediately, avatar_emoji, avatar_b64,
+         skills_json, experience_json, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).run(
       userId,
       input.full_name,
@@ -76,7 +87,9 @@ export function upsertCandidateProfile(
       input.min_hourly_wage ?? null,
       input.available_immediately === false ? 0 : 1,
       input.avatar_emoji ?? "👤",
+      input.avatar_b64 ?? null,
       skills,
+      expJson,
       now
     );
   }
