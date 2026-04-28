@@ -202,11 +202,11 @@ function SwipeCard({
           </div>
         </div>
 
-        <div className="flex-1 p-5 overflow-y-auto space-y-4" style={{ touchAction: isTop ? "none" : "auto" }}>
+        <div className="flex-1 p-5 overflow-hidden space-y-4">
           {candidate.bio && (
             <div>
               <div className="text-xs text-slate-400 uppercase mb-1">קצת עליי</div>
-              <p className="text-slate-700 whitespace-pre-wrap">{candidate.bio}</p>
+              <p className="text-slate-700 line-clamp-3">{candidate.bio}</p>
             </div>
           )}
 

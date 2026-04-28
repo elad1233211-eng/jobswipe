@@ -236,8 +236,8 @@ function JobCardInner({
         </div>
       </div>
 
-      {/* Body */}
-      <div className="flex-1 p-5 overflow-y-auto" style={{ touchAction: isTop ? "none" : "auto" }}>
+      {/* Body — overflow-hidden so iOS doesn't create a scroll layer that steals touch */}
+      <div className="flex-1 p-5 overflow-hidden">
         <div className="text-xs text-slate-400 uppercase tracking-wide mb-1">
           קטגוריה
         </div>
@@ -248,7 +248,7 @@ function JobCardInner({
             <div className="text-xs text-slate-400 uppercase tracking-wide mb-1">
               תיאור
             </div>
-            <p className="text-slate-700 mb-4 whitespace-pre-wrap">
+            <p className="text-slate-700 mb-4 line-clamp-4">
               {job.description}
             </p>
           </>
@@ -260,12 +260,15 @@ function JobCardInner({
               דרישות
             </div>
             <ul className="space-y-1 text-slate-700">
-              {job.requirements.map((r, i) => (
+              {job.requirements.slice(0, 4).map((r, i) => (
                 <li key={i} className="flex gap-2">
                   <span className="text-brand">•</span>
                   <span>{r}</span>
                 </li>
               ))}
+              {job.requirements.length > 4 && (
+                <li className="text-slate-400 text-sm">+{job.requirements.length - 4} עוד...</li>
+              )}
             </ul>
           </>
         )}
