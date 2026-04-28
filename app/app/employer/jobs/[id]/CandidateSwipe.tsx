@@ -185,7 +185,7 @@ function SwipeCard({
         transition: { duration: 0.3 },
       }}
     >
-      <div className="relative w-full h-full bg-white rounded-3xl card-shadow border border-slate-100 overflow-hidden flex flex-col">
+      <div className="relative w-full h-full bg-white rounded-3xl card-shadow border border-slate-100 overflow-hidden flex flex-col" style={{ touchAction: isTop ? "none" : "auto" }}>
         <div className="bg-brand-gradient p-6 text-white flex items-center gap-4">
           <div className="text-6xl">{candidate.avatar_emoji}</div>
           <div>
@@ -202,7 +202,7 @@ function SwipeCard({
           </div>
         </div>
 
-        <div className="flex-1 p-5 overflow-y-auto space-y-4">
+        <div className="flex-1 p-5 overflow-y-auto space-y-4" style={{ touchAction: isTop ? "none" : "auto" }}>
           {candidate.bio && (
             <div>
               <div className="text-xs text-slate-400 uppercase mb-1">קצת עליי</div>

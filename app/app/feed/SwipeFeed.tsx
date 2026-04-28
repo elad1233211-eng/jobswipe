@@ -215,7 +215,10 @@ function JobCardInner({
   isTop: boolean;
 }) {
   return (
-    <div className="relative w-full h-full bg-white rounded-3xl card-shadow border border-slate-100 overflow-hidden flex flex-col">
+    <div
+      className="relative w-full h-full bg-white rounded-3xl card-shadow border border-slate-100 overflow-hidden flex flex-col"
+      style={{ touchAction: isTop ? "none" : "auto" }}
+    >
       {/* Header with gradient */}
       <div className="bg-brand-gradient p-6 text-white">
         <div className="flex items-center gap-3 mb-2">
@@ -234,7 +237,7 @@ function JobCardInner({
       </div>
 
       {/* Body */}
-      <div className="flex-1 p-5 overflow-y-auto">
+      <div className="flex-1 p-5 overflow-y-auto" style={{ touchAction: isTop ? "none" : "auto" }}>
         <div className="text-xs text-slate-400 uppercase tracking-wide mb-1">
           קטגוריה
         </div>
