@@ -51,6 +51,11 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
+      - name: Seed demo database
+        run: npm run seed
+        env:
+          AUTH_SECRET: ci-only-insecure-secret-do-not-use-in-prod-1234567890
+
       - name: Run E2E tests
         run: npx playwright test
         env:

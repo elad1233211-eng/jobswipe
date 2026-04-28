@@ -39,8 +39,17 @@ export default async function LandingPage() {
         </div>
       </section>
 
+      {/* Stats bar */}
+      <section className="bg-white border-b border-slate-100 py-6 px-6">
+        <div className="max-w-3xl mx-auto flex flex-wrap justify-center gap-8 text-center">
+          <Stat number="דקה אחת" label="להקים פרופיל" />
+          <Stat number="ללא קורות חיים" label="פשוט ומהיר" />
+          <Stat number="Match = צ'אט" label="בלי מתווכים" />
+        </div>
+      </section>
+
       {/* How it works */}
-      <section className="py-14 px-6">
+      <section className="py-14 px-6 bg-slate-50">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-10">איך זה עובד?</h2>
           <div className="grid md:grid-cols-3 gap-6">
@@ -122,6 +131,15 @@ function Step({
       <div className="text-5xl mb-3">{emoji}</div>
       <h3 className="font-bold text-lg mb-2">{title}</h3>
       <p className="text-slate-600">{text}</p>
+    </div>
+  );
+}
+
+function Stat({ number, label }: { number: string; label: string }) {
+  return (
+    <div>
+      <div className="text-xl font-extrabold text-pink-600">{number}</div>
+      <div className="text-sm text-slate-500">{label}</div>
     </div>
   );
 }

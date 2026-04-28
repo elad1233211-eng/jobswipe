@@ -74,22 +74,26 @@ export default function SwipeFeed({ jobs }: { jobs: Job[] }) {
 
   if (!current) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-        <div className="text-6xl mb-4">🎉</div>
-        <h2 className="text-xl font-bold mb-2">עברת על כל המשרות!</h2>
-        <p className="text-slate-500 mb-4">חזור מאוחר יותר לעוד משרות חדשות</p>
+      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center gap-4 page-enter">
+        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-pink-100 to-violet-100 flex items-center justify-center text-5xl">
+          🎉
+        </div>
+        <div>
+          <h2 className="text-2xl font-extrabold text-slate-800 mb-1">עברת על הכל!</h2>
+          <p className="text-slate-500">חזור מאוחר יותר — משרות חדשות מתווספות כל הזמן</p>
+        </div>
         <Link
           href="/app/matches"
-          className="bg-brand-gradient text-white px-6 py-3 rounded-xl font-semibold"
+          className="bg-brand-gradient text-white px-8 py-3 rounded-2xl font-semibold shadow-lg"
         >
-          ההודעות שלי 💬
+          ההתאמות שלי 💬
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 flex flex-col items-center p-4">
+    <div className="flex-1 flex flex-col items-center p-4 page-enter">
       <div className="w-full max-w-sm flex justify-end mb-1">
         <ReportDialog targetKind="job" targetId={current.id} />
       </div>
@@ -203,6 +207,25 @@ function SwipeCard({
   );
 }
 
+// Category → color pill
+const CATEGORY_COLORS: Record<string, string> = {
+  "מסעדנות":    "bg-orange-100 text-orange-700",
+  "מלצרות":     "bg-orange-100 text-orange-700",
+  "שליחויות":   "bg-blue-100 text-blue-700",
+  "לוגיסטיקה":  "bg-blue-100 text-blue-700",
+  "ניקיון":     "bg-teal-100 text-teal-700",
+  "קמעונאות":   "bg-violet-100 text-violet-700",
+  "קופאי":      "bg-violet-100 text-violet-700",
+  "מחסן":       "bg-amber-100 text-amber-700",
+  "שמירה":      "bg-slate-100 text-slate-700",
+  "בריאות":     "bg-green-100 text-green-700",
+  "חינוך":      "bg-cyan-100 text-cyan-700",
+};
+
+function categoryColor(cat: string) {
+  return CATEGORY_COLORS[cat] ?? "bg-pink-100 text-pink-700";
+}
+
 function JobCardInner({
   job,
   likeMV,
@@ -221,14 +244,18 @@ function JobCardInner({
     >
       {/* Header with gradient */}
       <div className="bg-brand-gradient p-6 text-white">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="text-5xl">{job.logo_emoji}</div>
-          <div>
-            <div className="text-sm opacity-80">{job.company_name}</div>
+        <div className="flex items-start gap-3 mb-3">
+          <div className="text-5xl shrink-0">{job.logo_emoji}</div>
+          <div className="min-w-0">
+            <div className="text-sm opacity-80 truncate">{job.company_name}</div>
             <h2 className="text-2xl font-bold leading-tight">{job.title}</h2>
           </div>
         </div>
-        <div className="flex flex-wrap gap-2 mt-3 text-sm">
+        {/* Category badge */}
+        <span className={`inline-block text-xs font-semibold px-2.5 py-1 rounded-full mb-2 ${categoryColor(job.category)} bg-opacity-90`}>
+          {job.category}
+        </span>
+        <div className="flex flex-wrap gap-2 text-sm">
           <Chip>📍 {job.city}</Chip>
           {job.hourly_wage ? <Chip>💰 {job.hourly_wage} ₪/שעה</Chip> : null}
           {job.hours_per_week ? <Chip>⏱️ {job.hours_per_week} שעות/שבוע</Chip> : null}
@@ -238,31 +265,20 @@ function JobCardInner({
 
       {/* Body — overflow-hidden so iOS doesn't create a scroll layer that steals touch */}
       <div className="flex-1 p-5 overflow-hidden">
-        <div className="text-xs text-slate-400 uppercase tracking-wide mb-1">
-          קטגוריה
-        </div>
-        <div className="font-semibold mb-4">{job.category}</div>
-
         {job.description && (
           <>
-            <div className="text-xs text-slate-400 uppercase tracking-wide mb-1">
-              תיאור
-            </div>
-            <p className="text-slate-700 mb-4 line-clamp-4">
-              {job.description}
-            </p>
+            <div className="text-xs text-slate-400 uppercase tracking-wide mb-1">תיאור</div>
+            <p className="text-slate-700 mb-4 line-clamp-4">{job.description}</p>
           </>
         )}
 
         {job.requirements.length > 0 && (
           <>
-            <div className="text-xs text-slate-400 uppercase tracking-wide mb-1">
-              דרישות
-            </div>
+            <div className="text-xs text-slate-400 uppercase tracking-wide mb-1">דרישות</div>
             <ul className="space-y-1 text-slate-700">
               {job.requirements.slice(0, 4).map((r, i) => (
                 <li key={i} className="flex gap-2">
-                  <span className="text-brand">•</span>
+                  <span className="text-pink-400">✓</span>
                   <span>{r}</span>
                 </li>
               ))}
