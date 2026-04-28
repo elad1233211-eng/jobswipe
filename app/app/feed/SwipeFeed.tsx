@@ -180,7 +180,7 @@ function SwipeCard({
         scale,
         y: yOffset,
         zIndex: 10 - offset,
-        touchAction: isTop ? "none" : "auto",
+        touchAction: isTop ? "pan-y" : "auto",
       }}
       drag={isTop ? "x" : false}
       dragConstraints={{ left: 0, right: 0 }}
@@ -217,7 +217,7 @@ function JobCardInner({
   return (
     <div
       className="relative w-full h-full bg-white rounded-3xl card-shadow border border-slate-100 overflow-hidden flex flex-col"
-      style={{ touchAction: isTop ? "none" : "auto" }}
+      style={{ touchAction: isTop ? "pan-y" : "auto" }}
     >
       {/* Header with gradient */}
       <div className="bg-brand-gradient p-6 text-white">
