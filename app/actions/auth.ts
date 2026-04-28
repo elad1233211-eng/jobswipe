@@ -11,7 +11,7 @@ import {
 } from "@/lib/auth";
 import { deleteAccount } from "@/lib/domain";
 import { rateLimit, getClientKey } from "@/lib/rate-limit";
-import { sendVerificationEmail } from "@/lib/notifications";
+import { sendVerificationEmail, sendAdminNewUserNotification } from "@/lib/notifications";
 
 const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
@@ -58,8 +58,9 @@ export async function signupAction(
       parsed.data.role
     );
     await createSession(user);
-    // Fire-and-forget: send verification email in the background
+    // Fire-and-forget notifications — don't block the redirect
     sendVerificationEmail(user.id).catch(() => {});
+    sendAdminNewUserNotification({ id: user.id, email: user.email, role: user.role }).catch(() => {});
   } catch (e) {
     const msg = e instanceof Error ? e.message : "שגיאה";
     if (msg === "EMAIL_TAKEN")

@@ -14,6 +14,56 @@ import {
 const APP_URL =
   process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? "http://localhost:3000";
 
+// ---------- Admin: new user notification ----------
+
+export async function sendAdminNewUserNotification(user: {
+  id: string;
+  email: string;
+  role: string;
+}): Promise<void> {
+  const adminEmails = (process.env.ADMIN_EMAILS ?? "")
+    .split(",")
+    .map((e) => e.trim())
+    .filter(Boolean);
+  if (adminEmails.length === 0) return;
+
+  const roleHe = user.role === "candidate" ? "מחפש/ת עבודה" : "מעסיק/ה";
+  const adminUrl = `${APP_URL}/admin/users`;
+  const now = new Date().toLocaleString("he-IL", { timeZone: "Asia/Jerusalem" });
+
+  await sendEmail({
+    to: adminEmails.join(", "),
+    subject: `JobSwipe — משתמש חדש נרשם 🎉`,
+    text: [
+      `משתמש חדש נרשם ל-JobSwipe!`,
+      ``,
+      `אימייל: ${user.email}`,
+      `סוג: ${roleHe}`,
+      `זמן: ${now}`,
+      ``,
+      `לניהול משתמשים: ${adminUrl}`,
+    ].join("\n"),
+    html: `<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head><meta charset="utf-8"/></head>
+<body style="font-family:sans-serif;background:#f8fafc;padding:24px;direction:rtl">
+  <div style="max-width:480px;margin:0 auto;background:#fff;border-radius:16px;padding:32px;border:1px solid #e2e8f0">
+    <h1 style="color:#ec4899;margin-top:0">💼❤️ JobSwipe</h1>
+    <h2 style="color:#1e293b">משתמש חדש נרשם! 🎉</h2>
+    <table style="width:100%;border-collapse:collapse;margin:16px 0">
+      <tr><td style="padding:8px;color:#64748b;width:100px">אימייל</td><td style="padding:8px;font-weight:bold">${user.email}</td></tr>
+      <tr style="background:#f8fafc"><td style="padding:8px;color:#64748b">סוג</td><td style="padding:8px;font-weight:bold">${roleHe}</td></tr>
+      <tr><td style="padding:8px;color:#64748b">זמן</td><td style="padding:8px">${now}</td></tr>
+    </table>
+    <a href="${adminUrl}" style="display:inline-block;background:#ec4899;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;margin-top:8px">
+      לוח ניהול →
+    </a>
+  </div>
+</body>
+</html>`,
+  });
+}
+
 // ---------- Email verification ----------
 
 export async function sendVerificationEmail(userId: string): Promise<void> {
