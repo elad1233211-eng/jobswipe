@@ -180,6 +180,7 @@ function SwipeCard({
         scale,
         y: yOffset,
         zIndex: 10 - offset,
+        touchAction: isTop ? "none" : "auto",
       }}
       drag={isTop ? "x" : false}
       dragConstraints={{ left: 0, right: 0 }}
