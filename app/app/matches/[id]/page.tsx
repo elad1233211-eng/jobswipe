@@ -13,7 +13,7 @@ import ReportDialog from "@/app/components/ReportDialog";
 import BlockButton from "@/app/components/BlockButton";
 
 export default async function MatchChatPage(
-  props: PageProps<"/app/matches/[id]">
+  props: { params: Promise<{ id: string }> }
 ) {
   const { id } = await props.params;
   const user = await getCurrentUser();

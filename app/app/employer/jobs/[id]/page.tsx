@@ -8,7 +8,7 @@ import JobActions from "./JobActions";
 import JobStats from "./JobStats";
 
 export default async function JobDetail(
-  props: PageProps<"/app/employer/jobs/[id]">
+  props: { params: Promise<{ id: string }> }
 ) {
   const { id } = await props.params;
   const user = await getCurrentUser();

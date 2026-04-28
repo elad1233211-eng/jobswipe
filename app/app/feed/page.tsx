@@ -9,12 +9,12 @@ import {
 import SwipeFeed from "./SwipeFeed";
 import FeedFilters from "./FeedFilters";
 
-export default async function FeedPage(props: PageProps<"/app/feed">) {
+export default async function FeedPage(props: { searchParams?: Promise<Record<string, string | string[] | undefined>> }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
   if (user.role !== "candidate") redirect("/app/employer");
 
-  const sp = await props.searchParams;
+  const sp = (await props.searchParams) ?? {};
   const city = typeof sp.city === "string" ? sp.city : "";
   const category = typeof sp.category === "string" ? sp.category : "";
   const wageStr = typeof sp.wage === "string" ? sp.wage : "";

@@ -5,7 +5,7 @@ import { getJob } from "@/lib/domain";
 import JobForm from "../../JobForm";
 
 export default async function EditJobPage(
-  props: PageProps<"/app/employer/jobs/[id]/edit">
+  props: { params: Promise<{ id: string }> }
 ) {
   const { id } = await props.params;
   const user = await getCurrentUser();
