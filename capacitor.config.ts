@@ -20,7 +20,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
 
 const LOCAL_DEV = process.env.LOCAL_DEV === "true";
 const RAILWAY_URL =
-  process.env.RAILWAY_URL ?? "https://jobswipe.up.railway.app";
+  process.env.RAILWAY_URL ?? "https://jobswipe-production.up.railway.app";
 
 // 10.0.2.2 is the Android emulator's alias for the host machine's localhost
 const SERVER_URL = LOCAL_DEV ? "http://10.0.2.2:3000" : RAILWAY_URL;
