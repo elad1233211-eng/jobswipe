@@ -7,6 +7,7 @@ import { sendEmail } from "./email";
 import { sendPushToUser } from "./push";
 import {
   createVerificationToken,
+  createPasswordResetToken,
   getUserById,
   getMatchDetails,
 } from "./domain";
@@ -90,6 +91,32 @@ export async function sendVerificationEmail(userId: string): Promise<void> {
   });
 }
 
+// ---------- Password reset ----------
+
+export async function sendPasswordResetEmail(userId: string): Promise<void> {
+  const user = getUserById(userId);
+  if (!user) return;
+
+  const token = createPasswordResetToken(userId);
+  const resetUrl = `${APP_URL}/reset-password/${token}`;
+
+  await sendEmail({
+    to: user.email,
+    subject: "JobSwipe — איפוס סיסמה 🔑",
+    text: [
+      `שלום!`,
+      ``,
+      `קיבלנו בקשה לאיפוס הסיסמה שלך ב-JobSwipe.`,
+      `לחץ על הקישור הבא כדי לאפס את הסיסמה:`,
+      resetUrl,
+      ``,
+      `הקישור בתוקף לשעה אחת.`,
+      `אם לא ביקשת לאפס סיסמה, פשוט תתעלם מהמייל הזה.`,
+    ].join("\n"),
+    html: buildPasswordResetHtml(resetUrl),
+  });
+}
+
 // ---------- Match notification ----------
 
 export async function sendMatchEmails(matchId: string): Promise<void> {
@@ -114,7 +141,6 @@ export async function sendMatchEmails(matchId: string): Promise<void> {
       url: chatUrl,
     }),
   ]);
-
   // Email to candidate
   await sendEmail({
     to: candidateUser.email,
@@ -219,6 +245,28 @@ function buildMatchHtml(opts: {
        style="display:inline-block;background:#ec4899;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;margin:16px 0">
       פתח את הצ'אט עכשיו
     </a>
+    <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0"/>
+    <p style="color:#94a3b8;font-size:12px">JobSwipe — מוצאים עבודה בסוויפ 🇮🇱</p>
+  </div>
+</body>
+</html>`;
+}
+
+function buildPasswordResetHtml(resetUrl: string): string {
+  return `<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head><meta charset="utf-8"/></head>
+<body style="font-family:sans-serif;background:#f8fafc;padding:24px;direction:rtl">
+  <div style="max-width:480px;margin:0 auto;background:#fff;border-radius:16px;padding:32px;border:1px solid #e2e8f0">
+    <h1 style="color:#ec4899;margin-top:0">💼❤️ JobSwipe</h1>
+    <h2 style="color:#1e293b">איפוס סיסמה 🔑</h2>
+    <p style="color:#475569">קיבלנו בקשה לאיפוס הסיסמה שלך. לחץ על הכפתור כדי לבחור סיסמה חדשה.</p>
+    <a href="${resetUrl}"
+       style="display:inline-block;background:#ec4899;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;margin:16px 0">
+      אפס סיסמה
+    </a>
+    <p style="color:#94a3b8;font-size:13px">הקישור בתוקף לשעה אחת.<br/>
+       אם לא ביקשת לאפס סיסמה, תתעלם מהמייל הזה — הסיסמה שלך לא תשתנה.</p>
     <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0"/>
     <p style="color:#94a3b8;font-size:12px">JobSwipe — מוצאים עבודה בסוויפ 🇮🇱</p>
   </div>

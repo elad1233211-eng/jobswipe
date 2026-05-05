@@ -22,6 +22,10 @@ export default function AuthLayout({
         <Link href="/legal/accessibility" className="hover:underline">
           נגישות
         </Link>
+        <span aria-hidden="true">·</span>
+        <Link href="/legal/data-deletion" className="hover:underline">
+          מחיקת נתונים
+        </Link>
       </nav>
     </div>
   );

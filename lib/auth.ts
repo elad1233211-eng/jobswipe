@@ -7,9 +7,22 @@ import { hashPassword, verifyPassword } from "./password";
 export { hashPassword, verifyPassword };
 
 const COOKIE_NAME = "jobswipe_session";
-const SECRET = new TextEncoder().encode(
-  process.env.AUTH_SECRET || "dev-only-insecure-secret-change-me-12345678"
-);
+
+const _rawSecret =
+  process.env.AUTH_SECRET || "dev-only-insecure-secret-change-me-12345678";
+
+// Hard-fail in production if the default secret is still in use.
+if (
+  process.env.NODE_ENV === "production" &&
+  _rawSecret === "dev-only-insecure-secret-change-me-12345678"
+) {
+  throw new Error(
+    "AUTH_SECRET env var is not set. Generate one with:\n" +
+      "  node -e \"console.log(require('crypto').randomBytes(48).toString('base64url'))\""
+  );
+}
+
+const SECRET = new TextEncoder().encode(_rawSecret);
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 30; // 30 days
 
 export type SessionPayload = {

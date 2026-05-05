@@ -35,6 +35,12 @@ export default function LoginForm() {
         <p className="text-sm text-red-600 text-center">{state.error}</p>
       )}
 
+      <div className="flex justify-end">
+        <a href="/forgot-password" className="text-xs text-pink-500 hover:underline">
+          שכחתי סיסמה
+        </a>
+      </div>
+
       <button
         type="submit"
         disabled={pending}

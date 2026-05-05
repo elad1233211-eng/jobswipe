@@ -26,6 +26,10 @@ export default function LegalLayout({ children }: { children: React.ReactNode })
             נגישות
           </Link>
           <span>·</span>
+          <Link href="/legal/data-deletion" className="hover:text-pink-600">
+            מחיקת נתונים
+          </Link>
+          <span>·</span>
           <Link href="/" className="hover:text-pink-600">
             ← חזרה לדף הבית
           </Link>

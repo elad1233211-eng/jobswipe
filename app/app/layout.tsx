@@ -10,6 +10,7 @@ import VerifyBanner from "@/app/components/VerifyBanner";
 import PushPrompt from "@/app/components/PushPrompt";
 import BottomNav from "@/app/components/BottomNav";
 import AppHeader from "@/app/components/AppHeader";
+import AndroidBackButton from "@/app/components/AndroidBackButton";
 
 export default async function AppLayout({
   children,
@@ -35,6 +36,7 @@ export default async function AppLayout({
       <PushPrompt />
       {!user.email_verified_at && <VerifyBanner />}
 
+      <AndroidBackButton />
       <AppHeader
         homeHref={isCandidate ? "/app/feed" : "/app/employer"}
         logoutAction={logoutAction}

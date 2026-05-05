@@ -200,6 +200,53 @@ function initSchema(db: Database.Database) {
     );
 
     CREATE INDEX IF NOT EXISTS idx_push_user ON push_subscriptions(user_id);
+
+    -- ---------- FCM device tokens (Android/iOS native push) ----------
+    CREATE TABLE IF NOT EXISTS device_tokens (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      token      TEXT NOT NULL,
+      platform   TEXT NOT NULL DEFAULT 'android' CHECK(platform IN ('android','ios')),
+      created_at INTEGER NOT NULL,
+      UNIQUE(user_id, token)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_device_tokens_user ON device_tokens(user_id);
+
+    -- ---------- Password resets ----------
+    -- One token per user; replaced on every request.
+    CREATE TABLE IF NOT EXISTS password_resets (
+      user_id    TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+      token      TEXT NOT NULL UNIQUE,
+      expires_at INTEGER NOT NULL
+    );
+
+    -- ---------- Subscriptions (monetization) ----------
+    CREATE TABLE IF NOT EXISTS subscriptions (
+      id                   INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id              TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      tier                 TEXT NOT NULL DEFAULT 'free' CHECK(tier IN ('free','pro','business')),
+      source               TEXT NOT NULL DEFAULT 'manual' CHECK(source IN ('google_play','manual','promo')),
+      google_purchase_token TEXT,
+      started_at           INTEGER NOT NULL,
+      expires_at           INTEGER,
+      cancelled_at         INTEGER,
+      UNIQUE(user_id)
+    );
+
+    -- ---------- Job / candidate boosts ----------
+    CREATE TABLE IF NOT EXISTS boosts (
+      id                   INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id              TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      target_kind          TEXT NOT NULL CHECK(target_kind IN ('job','candidate')),
+      target_id            TEXT NOT NULL,
+      google_purchase_token TEXT,
+      started_at           INTEGER NOT NULL,
+      expires_at           INTEGER NOT NULL,
+      status               TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active','expired','refunded'))
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_boosts_target ON boosts(target_kind, target_id, status);
   `);
 }
 
@@ -303,4 +350,34 @@ export type PushSubRow = {
   p256dh: string;
   auth: string;
   created_at: number;
+};
+
+export type DeviceTokenRow = {
+  id: number;
+  user_id: string;
+  token: string;
+  platform: "android" | "ios";
+  created_at: number;
+};
+
+export type SubscriptionRow = {
+  id: number;
+  user_id: string;
+  tier: "free" | "pro" | "business";
+  source: "google_play" | "manual" | "promo";
+  google_purchase_token: string | null;
+  started_at: number;
+  expires_at: number | null;
+  cancelled_at: number | null;
+};
+
+export type BoostRow = {
+  id: number;
+  user_id: string;
+  target_kind: "job" | "candidate";
+  target_id: string;
+  google_purchase_token: string | null;
+  started_at: number;
+  expires_at: number;
+  status: "active" | "expired" | "refunded";
 };

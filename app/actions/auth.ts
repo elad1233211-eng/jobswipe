@@ -8,10 +8,16 @@ import {
   loginUser,
   registerUser,
   requireUser,
+  hashPassword,
 } from "@/lib/auth";
-import { deleteAccount } from "@/lib/domain";
+import { deleteAccount, consumePasswordResetToken } from "@/lib/domain";
+import { getDb } from "@/lib/db";
 import { rateLimit, getClientKey } from "@/lib/rate-limit";
-import { sendVerificationEmail, sendAdminNewUserNotification } from "@/lib/notifications";
+import {
+  sendVerificationEmail,
+  sendAdminNewUserNotification,
+  sendPasswordResetEmail,
+} from "@/lib/notifications";
 
 const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
@@ -110,6 +116,71 @@ export async function loginAction(
 export async function logoutAction(): Promise<void> {
   await destroySession();
   redirect("/");
+}
+
+// ---------- Password reset ----------
+
+const resetRequestSchema = z.object({
+  email: z.string().email("כתובת אימייל לא תקינה"),
+});
+
+const resetPasswordSchema = z.object({
+  token: z.string().min(1),
+  password: z.string().min(6, "סיסמה חייבת להיות לפחות 6 תווים"),
+});
+
+export async function requestPasswordResetAction(
+  _prev: AuthState,
+  formData: FormData
+): Promise<AuthState> {
+  // Rate limit: 3 requests per hour per IP
+  const ip = await getClientKey();
+  const rl = rateLimit("pw_reset_request", ip, 3, HOUR);
+  if (!rl.ok) {
+    return { error: "יותר מדי ניסיונות. נסה שוב בעוד שעה." };
+  }
+
+  const parsed = resetRequestSchema.safeParse({ email: formData.get("email") });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "קלט לא תקין" };
+  }
+
+  // Look up user (don't reveal if email exists)
+  const db = getDb();
+  const row = db
+    .prepare("SELECT id FROM users WHERE email = ?")
+    .get(parsed.data.email.trim().toLowerCase()) as { id: string } | undefined;
+
+  if (row) {
+    sendPasswordResetEmail(row.id).catch(() => {});
+  }
+
+  // Always return success to prevent email enumeration
+  return { error: undefined };
+}
+
+export async function resetPasswordAction(
+  _prev: AuthState,
+  formData: FormData
+): Promise<AuthState> {
+  const parsed = resetPasswordSchema.safeParse({
+    token: formData.get("token"),
+    password: formData.get("password"),
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "קלט לא תקין" };
+  }
+
+  const userId = consumePasswordResetToken(parsed.data.token);
+  if (!userId) {
+    return { error: "הקישור אינו תקין או שפג תוקפו. בקש איפוס סיסמה מחדש." };
+  }
+
+  const hash = await hashPassword(parsed.data.password);
+  const db = getDb();
+  db.prepare("UPDATE users SET password_hash = ? WHERE id = ?").run(hash, userId);
+
+  redirect("/login?reset=1");
 }
 
 export async function deleteAccountAction(): Promise<{ error: string } | never> {

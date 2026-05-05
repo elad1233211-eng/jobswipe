@@ -768,6 +768,94 @@ export function verifyEmailToken(token: string): string | null {
   return row.user_id;
 }
 
+// ---------- Password reset ----------
+
+const RESET_TTL_MS = 60 * 60 * 1000; // 1 hour
+
+export function createPasswordResetToken(userId: string): string {
+  const db = getDb();
+  const token = randomBytes(32).toString("hex");
+  const expiresAt = Date.now() + RESET_TTL_MS;
+  db.prepare(
+    `INSERT INTO password_resets (user_id, token, expires_at)
+     VALUES (?, ?, ?)
+     ON CONFLICT(user_id) DO UPDATE SET token=excluded.token, expires_at=excluded.expires_at`
+  ).run(userId, token, expiresAt);
+  return token;
+}
+
+/**
+ * Validate reset token and return the user_id, then delete the token.
+ * Returns null on invalid/expired token.
+ */
+export function consumePasswordResetToken(token: string): string | null {
+  const db = getDb();
+  const row = db
+    .prepare("SELECT user_id, expires_at FROM password_resets WHERE token = ?")
+    .get(token) as { user_id: string; expires_at: number } | undefined;
+  if (!row) return null;
+  db.prepare("DELETE FROM password_resets WHERE token = ?").run(token);
+  if (Date.now() > row.expires_at) return null;
+  return row.user_id;
+}
+
+// ---------- FCM device tokens ----------
+
+export function saveDeviceToken(
+  userId: string,
+  token: string,
+  platform: "android" | "ios" = "android"
+): void {
+  const db = getDb();
+  db.prepare(
+    `INSERT INTO device_tokens (user_id, token, platform, created_at)
+     VALUES (?, ?, ?, ?)
+     ON CONFLICT(user_id, token) DO UPDATE SET platform=excluded.platform`
+  ).run(userId, token, platform, Date.now());
+}
+
+export function removeDeviceToken(userId: string, token: string): void {
+  const db = getDb();
+  db.prepare(
+    "DELETE FROM device_tokens WHERE user_id = ? AND token = ?"
+  ).run(userId, token);
+}
+
+export function getDeviceTokensForUser(userId: string): { token: string; platform: string }[] {
+  const db = getDb();
+  return db
+    .prepare("SELECT token, platform FROM device_tokens WHERE user_id = ?")
+    .all(userId) as { token: string; platform: string }[];
+}
+
+// ---------- Subscriptions ----------
+
+export function getUserTier(userId: string): "free" | "pro" | "business" {
+  const db = getDb();
+  const row = db
+    .prepare(
+      `SELECT tier FROM subscriptions
+       WHERE user_id = ? AND (expires_at IS NULL OR expires_at > ?)
+       LIMIT 1`
+    )
+    .get(userId, Date.now()) as { tier: string } | undefined;
+  return (row?.tier ?? "free") as "free" | "pro" | "business";
+}
+
+// ---------- Boosts ----------
+
+export function isTargetBoosted(targetKind: "job" | "candidate", targetId: string): boolean {
+  const db = getDb();
+  const row = db
+    .prepare(
+      `SELECT 1 FROM boosts
+       WHERE target_kind=? AND target_id=? AND status='active' AND expires_at > ?
+       LIMIT 1`
+    )
+    .get(targetKind, targetId, Date.now());
+  return !!row;
+}
+
 /** Get a user by id (convenience for notifications layer). */
 export function getUserById(userId: string): UserRow | null {
   const db = getDb();
