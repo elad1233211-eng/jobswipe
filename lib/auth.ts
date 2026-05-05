@@ -8,21 +8,23 @@ export { hashPassword, verifyPassword };
 
 const COOKIE_NAME = "jobswipe_session";
 
-const _rawSecret =
-  process.env.AUTH_SECRET || "dev-only-insecure-secret-change-me-12345678";
+const DEV_FALLBACK_SECRET = "dev-only-insecure-secret-change-me-12345678";
 
-// Hard-fail in production if the default secret is still in use.
-if (
-  process.env.NODE_ENV === "production" &&
-  _rawSecret === "dev-only-insecure-secret-change-me-12345678"
-) {
-  throw new Error(
-    "AUTH_SECRET env var is not set. Generate one with:\n" +
-      "  node -e \"console.log(require('crypto').randomBytes(48).toString('base64url'))\""
-  );
+// Lazy: evaluated on first use, not at module load — so `next build` doesn't
+// fail on hosts where AUTH_SECRET is set as a runtime-only env var.
+let _secretBytes: Uint8Array | null = null;
+function getSecret(): Uint8Array {
+  if (_secretBytes) return _secretBytes;
+  const raw = process.env.AUTH_SECRET || DEV_FALLBACK_SECRET;
+  if (process.env.NODE_ENV === "production" && raw === DEV_FALLBACK_SECRET) {
+    throw new Error(
+      "AUTH_SECRET env var is not set in production. Generate one with:\n" +
+        "  node -e \"console.log(require('crypto').randomBytes(48).toString('base64url'))\""
+    );
+  }
+  _secretBytes = new TextEncoder().encode(raw);
+  return _secretBytes;
 }
-
-const SECRET = new TextEncoder().encode(_rawSecret);
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 30; // 30 days
 
 export type SessionPayload = {
@@ -36,12 +38,12 @@ async function signToken(payload: SessionPayload): Promise<string> {
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime(`${SESSION_TTL_SECONDS}s`)
-    .sign(SECRET);
+    .sign(getSecret());
 }
 
 async function verifyToken(token: string): Promise<SessionPayload | null> {
   try {
-    const { payload } = await jwtVerify(token, SECRET);
+    const { payload } = await jwtVerify(token, getSecret());
     return {
       sub: payload.sub as string,
       role: payload.role as Role,
