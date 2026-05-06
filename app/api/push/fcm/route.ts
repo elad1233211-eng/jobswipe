@@ -2,8 +2,11 @@ import { getCurrentUser } from "@/lib/auth";
 import { saveDeviceToken, removeDeviceToken } from "@/lib/domain";
 import { z } from "zod";
 
+// FCM tokens are typically ~152 chars; cap at 1024 to defend against
+// authenticated abuse (the (user_id, token) UNIQUE constraint already
+// prevents duplicates).
 const registerSchema = z.object({
-  token: z.string().min(1),
+  token: z.string().min(1).max(1024),
   platform: z.enum(["android", "ios"]).default("android"),
 });
 

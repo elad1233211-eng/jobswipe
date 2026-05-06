@@ -38,10 +38,17 @@ const candidateSchema = z.object({
   available_immediately: z.string().optional(),
   avatar_emoji: z.string().optional(),
   skills: z.string().optional(),
-  // New: profile photo as data-URI base64 JPEG (empty = keep existing)
-  avatar_b64: z.string().optional(),
-  // New: per-domain experience JSON {"domain": years | null}
-  experience_json: z.string().optional(),
+  // Profile photo as data-URI base64 JPEG. Client resizes to ~200px / ~20KB;
+  // server caps at 250KB (~10× expected) and enforces JPEG/PNG data-URI format
+  // so a malicious caller can't bypass the client and stuff arbitrary blobs.
+  avatar_b64: z
+    .string()
+    .max(250_000, "התמונה גדולה מדי")
+    .regex(/^$|^data:image\/(jpeg|png);base64,[A-Za-z0-9+/=]+$/, "פורמט תמונה לא תקין")
+    .optional(),
+  // Per-domain experience JSON {"domain": years | null}. Capped to keep DB
+  // rows reasonable; clients send tiny objects.
+  experience_json: z.string().max(2_000, "יותר מדי תחומים").optional(),
 });
 
 export async function saveCandidateProfileAction(
