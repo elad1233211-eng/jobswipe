@@ -9,12 +9,15 @@
     "seed": "tsx scripts/seed.ts",
     "gen-vapid": "tsx scripts/gen-vapid.ts",
     "gen-icons": "tsx scripts/gen-icons.ts",
+    "gen-screenshots": "tsx scripts/capture-screenshots.ts",
     "db:reset": "node -e \"require('fs').rmSync('data',{recursive:true,force:true})\" && npm run seed",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "android:sync": "npx cap sync android",
     "android:open": "npx cap open android",
-    "android:build": "npm run build && npx cap sync android && npx cap open android"
+    "android:build": "npm run build && npx cap sync android && npx cap open android",
+    "android:debug": "npx cap sync android && tsx scripts/android-build.ts assembleDebug",
+    "android:release": "npx cap sync android && tsx scripts/android-build.ts bundleRelease"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.1",
