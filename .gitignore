@@ -45,3 +45,8 @@ next-env.d.ts
 
 # Claude Code local settings (per-user)
 .claude/settings.local.json
+
+# Android signing — never commit
+android/keystore.properties
+*.keystore
+*.jks
