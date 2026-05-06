@@ -65,6 +65,46 @@ async function main() {
   console.log("\nPlay Store hi-res icon:");
   await renderPng(svgSource, 512, path.join(ROOT, "playstore-icon-512.png"));
 
+  console.log("\nPlay Store feature graphic (1024×500):");
+  const featureSvgPath = path.join(ROOT, "public", "icons", "feature-graphic.svg");
+  if (fs.existsSync(featureSvgPath)) {
+    const featureSvg = fs.readFileSync(featureSvgPath);
+    fs.mkdirSync(path.dirname(path.join(ROOT, "playstore-feature-graphic.png")), { recursive: true });
+    await sharp(featureSvg).resize(1024, 500).png().toFile(path.join(ROOT, "playstore-feature-graphic.png"));
+    console.log(`  ✓ playstore-feature-graphic.png (1024×500)`);
+  } else {
+    console.log("  (skip — feature-graphic.svg not found)");
+  }
+
+  console.log("\nAndroid splash screen (drawable):");
+  // Splash should be a centered logo on a solid pink background. We render
+  // the icon at ~40% of the canvas, centered.
+  const splashSizes = [
+    { name: "drawable-port-mdpi", w: 320, h: 480 },
+    { name: "drawable-port-hdpi", w: 480, h: 800 },
+    { name: "drawable-port-xhdpi", w: 720, h: 1280 },
+    { name: "drawable-port-xxhdpi", w: 960, h: 1600 },
+    { name: "drawable-port-xxxhdpi", w: 1280, h: 1920 },
+  ];
+  for (const { name, w, h } of splashSizes) {
+    const logoSize = Math.round(Math.min(w, h) * 0.4);
+    const splash = await sharp({
+      create: { width: w, height: h, channels: 4, background: { r: 236, g: 72, b: 153, alpha: 1 } },
+    })
+      .composite([
+        {
+          input: await sharp(svgSource).resize(logoSize, logoSize).png().toBuffer(),
+          gravity: "center",
+        },
+      ])
+      .png()
+      .toBuffer();
+    const out = path.join(ROOT, "android", "app", "src", "main", "res", name, "splash.png");
+    fs.mkdirSync(path.dirname(out), { recursive: true });
+    fs.writeFileSync(out, splash);
+    console.log(`  ✓ ${path.relative(ROOT, out)} (${w}×${h})`);
+  }
+
   console.log("\nAndroid launcher icons:");
   const fgSvg = buildForegroundSvg();
   for (const { folder, size } of ANDROID_DENSITIES) {

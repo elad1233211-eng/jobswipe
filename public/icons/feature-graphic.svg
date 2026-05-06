@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 500" width="1024" height="500">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ec4899"/>
+      <stop offset="100%" stop-color="#8b5cf6"/>
+    </linearGradient>
+    <linearGradient id="iconBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.85"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background gradient -->
+  <rect width="1024" height="500" fill="url(#bg)"/>
+
+  <!-- Decorative subtle circles -->
+  <circle cx="900" cy="100" r="180" fill="#ffffff" opacity="0.08"/>
+  <circle cx="950" cy="450" r="120" fill="#ffffff" opacity="0.06"/>
+  <circle cx="100" cy="450" r="80" fill="#ffffff" opacity="0.06"/>
+
+  <!-- Logo box on the left -->
+  <g transform="translate(80, 130)">
+    <rect width="240" height="240" rx="48" fill="url(#iconBg)"/>
+    <!-- Briefcase body -->
+    <rect x="40" y="100" width="160" height="100" rx="14" fill="#ec4899" opacity="0.92"/>
+    <!-- Briefcase handle -->
+    <path d="M85 100 v-16 a35 35 0 0 1 70 0 v16" fill="none" stroke="#ec4899" stroke-width="14" stroke-linecap="round" opacity="0.92"/>
+    <!-- Center divider -->
+    <rect x="40" y="140" width="160" height="12" fill="#ffffff" opacity="0.4"/>
+    <!-- Heart overlay -->
+    <g transform="translate(168, 160) scale(0.45)">
+      <path d="M64 28 C64 12 44 0 28 16 C12 0 -8 12 -8 28 C-8 44 28 80 28 80 C28 80 64 44 64 28Z"
+            fill="#f9a8d4" opacity="0.95"/>
+    </g>
+  </g>
+
+  <!-- Right-side text block -->
+  <g transform="translate(380, 0)">
+    <text x="0" y="180" font-family="-apple-system, system-ui, 'Segoe UI', Arial, sans-serif"
+          font-weight="900" font-size="96" fill="#ffffff">JobSwipe</text>
+    <text x="0" y="240" font-family="-apple-system, system-ui, 'Segoe UI', Arial, sans-serif"
+          font-weight="600" font-size="38" fill="#ffffff" opacity="0.95">מוצאים עבודה בסוויפ</text>
+
+    <!-- Tagline pills -->
+    <g transform="translate(0, 290)" font-family="-apple-system, system-ui, sans-serif" font-weight="600" font-size="22">
+      <g transform="translate(0, 0)">
+        <rect width="160" height="48" rx="24" fill="#ffffff" opacity="0.95"/>
+        <text x="80" y="32" text-anchor="middle" fill="#ec4899">⚡ מהיר</text>
+      </g>
+      <g transform="translate(180, 0)">
+        <rect width="160" height="48" rx="24" fill="#ffffff" opacity="0.95"/>
+        <text x="80" y="32" text-anchor="middle" fill="#ec4899">💼 ישיר</text>
+      </g>
+      <g transform="translate(360, 0)">
+        <rect width="200" height="48" rx="24" fill="#ffffff" opacity="0.95"/>
+        <text x="100" y="32" text-anchor="middle" fill="#ec4899">🇮🇱 ישראלי</text>
+      </g>
+    </g>
+  </g>
+</svg>
