@@ -58,8 +58,10 @@ async function main() {
   await go(page, `${BASE}/login`);
   await shoot(page, "02-login");
 
-  console.log("\nCandidate (noa@demo.com):");
-  await login(page, "noa@demo.com", "demo1234");
+  // Use amit@demo.com instead of noa — noa has been used for manual testing
+  // and her feed is already empty.
+  console.log("\nCandidate (amit@demo.com):");
+  await login(page, "amit@demo.com", "demo1234");
 
   await go(page, `${BASE}/app/feed`);
   await shoot(page, "03-feed");

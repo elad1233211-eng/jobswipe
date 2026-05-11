@@ -22,6 +22,13 @@ const nextConfig: NextConfig = {
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+          // HSTS — Railway terminates TLS but doesn't add HSTS itself.
+          // 2-year max-age + includeSubDomains is the standard recommendation
+          // once you're confident every subdomain serves HTTPS.
+          { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" },
+          // Block embedding via legacy CSP frame-ancestors (X-Frame-Options is
+          // deprecated in modern browsers but still respected by older ones).
+          { key: "Content-Security-Policy", value: "frame-ancestors 'self'" },
         ],
       },
     ];
