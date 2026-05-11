@@ -104,11 +104,11 @@ Answer these in the Data safety section:
 
 | Asset | Size | Status | Source |
 |---|---|---|---|
-| App icon (hi-res) | 512×512 PNG | ✓ Done | playstore-icon-512.png |
-| Feature graphic | 1024×500 PNG | ❌ Need | Create in Canva/Figma |
-| Phone screenshots (min 2, max 8) | 1080×1920 or similar | ❌ Need | Take from running app |
-| 7-inch tablet screenshots (optional) | 1200×1920 | ❌ Optional | — |
-| 10-inch tablet screenshots (optional) | 1920×1200 | ❌ Optional | — |
+| App icon (hi-res) | 512×512 PNG | ✓ Done | `playstore-icon-512.png` |
+| Feature graphic | 1024×500 PNG | ✓ Done | `playstore-feature-graphic.png` (regenerate: `npx tsx scripts/gen-feature-graphic.ts`) |
+| Phone screenshots (min 2, max 8) | 1170×2532 PNG | ✓ Done (4) | `playstore-screenshots/01..07-*.png` (regenerate: `npm run gen-screenshots`) |
+| 7-inch tablet screenshots (optional) | 1200×1920 | — Optional | — |
+| 10-inch tablet screenshots (optional) | 1920×1200 | — Optional | — |
 
 ---
 
